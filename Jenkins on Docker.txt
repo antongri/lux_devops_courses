@@ -1,0 +1,69 @@
+1. Скачиваем образ с докер хаба:
+	$ docker pull jenkins/jenkins:lts
+
+	lts: Pulling from jenkins/jenkins
+	9a0b0ce99936: Pull complete 
+	db3b6004c61a: Pull complete 
+	f8f075920295: Pull complete 
+	6ef14aff1139: Pull complete 
+	962785d3b7f9: Pull complete 
+	631589572f9b: Pull complete 
+	c55a0c6f4c7b: Pull complete 
+	4e96cf3bdc20: Pull complete 
+	e0b44ce6ec69: Pull complete 
+	d961082c76f4: Pull complete 
+	5a229d171c71: Pull complete 
+	64514e4513d4: Pull complete 
+	6797bb506402: Pull complete 
+	b8d0a307156c: Pull complete 
+	b17b306b4a0a: Pull complete 
+	e47bd954be8f: Pull complete 
+	b2d9d6b1cd91: Pull complete 
+	fa537a81cda1: Pull complete 
+	Digest: sha256:64576b8bd0a7f5c8ca275f4926224c29e7aa3f3167923644ec1243cd23d611f3
+	Status: Downloaded newer image for jenkins/jenkins:lts
+	docker.io/jenkins/jenkins:lts
+
+2. Created directory for Jenkins data
+	$mkdir /var/jenkins_home
+
+	Checking:
+	$ ll /var/ | grep jenkins_home
+	drwxr-xr-x.  2 root root    6 Dec 13 05:20 jenkins_home
+
+	Adding 777 permissions on it directory:
+	chmod 777 /var/jenkins_home
+
+3. Run container with volumes:
+	$ docker run -p 8080:8080 -p 50000:50000 -v /var/jenkins_home:/var/jenkins_home jenkins/jenkins:lts
+	Note: '/var/jenkins_home:/var/jenkins_home' - first parameter it's a host system, second parameter it's a docker container
+
+	Running from: /usr/share/jenkins/jenkins.war
+	webroot: EnvVars.masterEnvVars.get("JENKINS_HOME")
+	2019-12-13 10:22:22.600+0000 [id=1]     INFO    org.eclipse.jetty.util.log.Log#initialized: Logging initialized @3328ms to org.eclipse.jetty.util.log.JavaUtilLog
+	2019-12-13 10:22:23.181+0000 [id=1]     INFO    winstone.Logger#logInternal: Beginning extraction from war file
+	2019-12-13 10:22:29.345+0000 [id=1]     WARNING o.e.j.s.handler.ContextHandler#setContextPath: Empty contextPath
+	2019-12-13 10:22:29.665+0000 [id=1]     INFO    org.eclipse.jetty.server.Server#doStart: jetty-9.4.z-SNAPSHOT; built: 2019-05-02T00:04:53.875Z; git: 	e1bc35120a6617ee3df052294e433f3a25ce7097; jvm 1.8.0_232-b09
+	2019-12-13 10:22:31.978+0000 [id=1]     INFO    o.e.j.w.StandardDescriptorProcessor#visitServlet: NO JSP Support for /, did not find 	org.eclipse.jetty.jsp.JettyJspServlet
+	2019-12-13 10:22:32.312+0000 [id=1]     INFO    o.e.j.s.s.DefaultSessionIdManager#doStart: DefaultSessionIdManager workerName=node0
+	2019-12-13 10:22:32.312+0000 [id=1]     INFO    o.e.j.s.s.DefaultSessionIdManager#doStart: No SessionScavenger set, using defaults
+	2019-12-13 10:22:32.338+0000 [id=1]     INFO    o.e.j.server.session.HouseKeeper#startScavenging: node0 Scavenging every 660000ms
+	Jenkins home directory: /var/jenkins_home found at: EnvVars.masterEnvVars.get("JENKINS_HOME")
+	2019-12-13 10:22:36.229+0000 [id=1]     INFO    o.e.j.s.handler.ContextHandler#doStart: Started w.@53499d85{Jenkins v2.190.3,/,file:///var/jenkins_home/war/,AVAILABLE}{/var/jenkins_home/war}
+	.........
+	Jenkins initial setup is required. An admin user has been created and a password generated.
+	Please use the following password to proceed to installation:
+	c0e9170b1f5d4cf292460d2cd81217c3
+	........
+
+4. Check process:
+	$ ps aux | grep 8080
+
+
+5. Open browser and check Jenkins UI (some browser can't opening localhost pages, for example, I had an issue with konqueror in CentOS 7. I fix it when installed Chrome)
+	http://localhost:8080
+	After that, you need to create user and setup system. For first use you need to use password above or you can find password in /var/jenkins_home/secrets/initialAdminPassword
+
+Additional parameters you can find on here - https://github.com/jenkinsci/docker/blob/master/README.md
+
+
