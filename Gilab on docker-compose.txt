@@ -1,0 +1,221 @@
+1. Create directories for gitlab:
+	$ mkdir /var/gitlab && mkdir  /var/gitlab/configs/ && mkdir  /var/gitlab/configs/nginx-conf/ && mkdir  /var/gitlab/configs/nginx-logs && mkdir /var/gitlab/configs/gitlab-config && mkdir /var/gitlab/configs/gitlab-data && mkdir /var/gitlab/configs/gitlab-logs && mkdir /var/gitlab/postgresql-data && mkdir /var/gitlab/redis-data
+
+
+2. Create docker-compose.yml file in /var/gitlab:
+version: '2'
+services:
+  nginx:
+    restart: always
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+     - "/var/gitlab/configs/nginx-conf/nginx.conf:/etc/nginx/nginx.conf:ro"
+     - "/var/gitlab/configs/nginx-conf/gitlab-http.conf:/etc/nginx/conf.d/gitlab-http.conf:ro"
+     - "/var/gitlab/configs/nginx-logs:/var/log/nginx"
+    network_mode: "bridge"
+    ports:
+     - "8080:80"
+    depends_on:
+      - gitlab_app
+    links:
+      - gitlab_app
+  gitlab_app:
+    restart: always
+    image: 'gitlab/gitlab-ce:latest'
+    hostname: 'git'
+    container_name: gitlab_app
+    expose:
+    - "8081"
+    volumes:
+     - "/var/gitlab/configs/gitlab-config:/etc/gitlab"
+     - "/var/gitlab/configs/gitlab-data:/var/opt/gitlab"
+     - "/var/gitlab/configs/gitlab-logs:/var/log/gitlab"
+    network_mode: "bridge"
+    ports:
+     - "8022:22"
+    depends_on:
+      - postgresql
+      - redis
+    links:
+      - postgresql
+      - redis
+  postgresql:
+    restart: always
+    image: postgres:latest
+    container_name: postgresql
+    environment:
+     - POSTGRES_PASSWORD=T0pS3cr3T
+    expose:
+    - "5432"
+    volumes:
+     - "/var/gitlab/postgresql-data:/var/lib/postgresql/data"
+    network_mode: "bridge"
+  redis:
+    restart: always
+    image: redis:latest
+    container_name: redis
+    expose:
+    - "6379"
+    volumes:
+     - "/var/gitlab/redis-data:/data"
+    network_mode: "bridge"
+
+
+3. Copy these data in /var/gitlab/configs/nginx-conf/nginx.conf:
+	$ vim /var/gitlab/configs/nginx-conf/nginx.conf
+
+# This file is managed by gitlab-ctl. Manual changes will be
+# erased! To change the contents below, edit /etc/gitlab/gitlab.rb
+# and run `sudo gitlab-ctl reconfigure`.
+user nginx;
+worker_processes 1;
+error_log stderr;
+pid nginx.pid;
+events {
+  worker_connections 10240;
+}
+http {
+  log_format gitlab_access '$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"';
+  log_format gitlab_ci_access '$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"';
+  log_format gitlab_mattermost_access '$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"';
+server_names_hash_bucket_size 64;
+sendfile on;
+  tcp_nopush on;
+  tcp_nodelay on;
+keepalive_timeout 65;
+gzip on;
+  gzip_http_version 1.0;
+  gzip_comp_level 2;
+  gzip_proxied any;
+  gzip_types text/plain text/css application/x-javascript text/xml application/xml application/xml+rss text/javascript application/json;
+include mime.types;
+proxy_cache_path proxy_cache keys_zone=gitlab:10m max_size=1g levels=1:2;
+  proxy_cache gitlab;
+include /etc/nginx/conf.d/gitlab-http.conf;
+}
+
+
+4. Copy these data in /var/gitlab/configs/nginx-conf/gitlab-http.conf:
+	$ vim /var/gitlab/configs/nginx-conf/gitlab-http.conf
+
+upstream gitlab-workhorse {
+  server gitlab_app:80;
+}
+server {
+  listen *:80;
+server_name gitlab;
+  server_tokens off; ## Don't show the nginx version number, a security best practice
+## Increase this if you want to upload large attachments
+  ## Or if you want to accept large git objects over http
+  client_max_body_size 0;
+## Real IP Module Config
+  ## http://nginx.org/en/docs/http/ngx_http_realip_module.html
+## Individual nginx logs for this GitLab vhost
+  access_log  /var/log/nginx/gitlab_access.log gitlab_access;
+  error_log   /var/log/nginx/gitlab_error.log;
+location / {
+    ## If you use HTTPS make sure you disable gzip compression
+    ## to be safe against BREACH attack.
+## https://github.com/gitlabhq/gitlabhq/issues/694
+    ## Some requests take more than 30 seconds.
+    proxy_read_timeout      3600;
+    proxy_connect_timeout   300;
+    proxy_redirect          off;
+proxy_http_version 1.1;
+proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto http;
+proxy_pass http://gitlab-workhorse;
+  }
+}
+
+
+5. Start docker compose:
+	$ docker-compose up -d
+
+Note: if docker-compose not installed follow this instruction:
+	1. $ sudo curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+	2. $ sudo chmod +x /usr/local/bin/docker-compose
+	3. $ sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+	4. check version - $ docker-compose --version
+
+Pulling postgresql (postgres:latest)...
+latest: Pulling from library/postgres
+000eee12ec04: Pull complete
+7b8ef50e8d64: Pull complete
+304f7c67e7db: Pull complete
+9fe4298c8c65: Pull complete
+f1ca857656d1: Pull complete
+95d6c34812f7: Pull complete
+9436c546bd1d: Pull complete
+922326a079d9: Pull complete
+d6e9dcf0d140: Pull complete
+83ac3914c283: Pull complete
+5ffbf9359c6e: Pull complete
+d280abe82126: Pull complete
+f5a37695fe7e: Pull complete
+233830cd10db: Pull complete
+Digest: sha256:c4da9c62c26179440d5dc7409cb7db60f4a498f0f2c080b97fdb9f7ec0b3502b
+Status: Downloaded newer image for postgres:latest
+Pulling redis (redis:latest)...
+latest: Pulling from library/redis
+000eee12ec04: Already exists
+5cc53381c195: Pull complete
+48bb7bcb5fbf: Pull complete
+ef8a890bb1c2: Pull complete
+32ada9c6fb0d: Pull complete
+76e034b0f296: Pull complete
+Digest: sha256:1eedfc017b0cd3e232878ce38bd9328518219802a8ef37fe34f58dcf591688ef
+Status: Downloaded newer image for redis:latest
+Pulling gitlab_app (gitlab/gitlab-ce:latest)...
+latest: Pulling from gitlab/gitlab-ce
+976a760c94fc: Pull complete
+c58992f3c37b: Pull complete
+0ca0e5e7f12e: Pull complete
+f2a274cc00ca: Pull complete
+c045698d67b4: Pull complete
+e0367cd8b5f5: Pull complete
+da186727114d: Pull complete
+2f2177f51b98: Pull complete
+65a42f01468a: Pull complete
+46f7d7149cc1: Pull complete
+Digest: sha256:e8418e2449ca13a0ee5b2fe7803f31e09c67bb8e4445120e212eddd8670b6ada
+Status: Downloaded newer image for gitlab/gitlab-ce:latest
+Pulling nginx (nginx:latest)...
+latest: Pulling from library/nginx
+000eee12ec04: Already exists
+eb22865337de: Pull complete
+bee5d581ef8b: Pull complete
+Digest: sha256:50cf965a6e08ec5784009d0fccb380fc479826b6e0e65684d9879170a9df8566
+Status: Downloaded newer image for nginx:latest
+Creating postgresql ... done
+Creating redis      ... done
+Creating gitlab_app ... done
+Creating nginx      ... done
+
+
+6. Checkin running containers:
+docker ps
+CONTAINER ID        IMAGE                     COMMAND                  CREATED              STATUS                                 PORTS                                             NAMES
+3690502c0453        nginx:latest              "nginx -g 'daemon of…"   About a minute ago   Up About a minute                      0.0.0.0:8080->80/tcp                              nginx
+1508acc1a3d1        gitlab/gitlab-ce:latest   "/assets/wrapper"        About a minute ago   Up About a minute (health: starting)   80/tcp, 443/tcp, 8081/tcp, 0.0.0.0:8022->22/tcp   gitlab_app
+725c676b1150        postgres:latest           "docker-entrypoint.s…"   About a minute ago   Up About a minute                      5432/tcp                                          postgresql
+8fc5b3f524dc        redis:latest              "docker-entrypoint.s…"   About a minute ago   Up About a minute                      6379/tcp                                          redis
+
+
+7. Open page http://localhost:8080 in browser.
+If you have 502 error, just wait a couple minutes.
+
+8. Kill docker compose containers:
+	$ docker-compose down
+
+	Stopping nginx      ... done
+	Stopping gitlab_app ... done
+	Stopping postgresql ... done
+	Stopping redis      ... done
+	Removing nginx      ... done
+	Removing gitlab_app ... done
+	Removing postgresql ... done
+	Removing redis      ... done
