@@ -1,4 +1,4 @@
-1. Скачиваем образ с докер хаба:
+1. Download image from Docker Hub:
 	$ docker pull jenkins/jenkins:lts
 
 	lts: Pulling from jenkins/jenkins
