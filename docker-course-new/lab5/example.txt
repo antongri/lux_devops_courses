@@ -1,0 +1,12 @@
+Run ubuntu containe in fist console:
+	$ docker run -it ubuntu /bin/bash
+	Copy CONTAINER ID from "docker ps" output and run this command in seccond console:
+	$ docker kill CONTAINER_ID
+	After that, check first console, as you can see, container is dead (you can check "docker ps").
+
+----
+Run ubuntu containe in fist console:
+	$ docker run -it ubuntu /bin/bash
+	Copy CONTAINER ID from "docker ps" output and run this command in seccond console:
+	$ docker exec -it CONTAINER_ID /bin/bash 
+	As you can see, you can enter in container as root and using bash shell.

@@ -1,0 +1,17 @@
+Example:
+	$ docker pull ubuntu
+
+Result:
+$ docker pull ubuntu
+Using default tag: latest
+latest: Pulling from library/ubuntu
+c1bbdc448b72: Pull complete 
+Digest: sha256:6e9f67fa63b0323e9a1e587fd71c561ba48a034504fb804fd26fd8800039835d
+Status: Downloaded newer image for ubuntu:latest
+docker.io/library/ubuntu:latest
+
+
+Check image on local registry:
+	$ docker image ls
+REPOSITORY             TAG                 IMAGE ID            CREATED             SIZE
+ubuntu                 latest              775349758637        6 weeks ago         64.2MB

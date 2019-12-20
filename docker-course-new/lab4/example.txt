@@ -1,0 +1,15 @@
+Checking all running containers:
+	$ docker ps
+
+Checking all existing cintainers:
+	$ docker ps -a
+
+
+-----
+Run one container and check $ docker ps:
+	$ docker run -it ubuntu /bin/bash
+	Open an another console:
+	$ docker ps
+	Copy CONTAINER ID and run "$ docker logs CONTAINER_ID" command:
+	$ docker run CONTAINER_ID -f
+	Now if you made some action in container (on first console) you can see it in seccond console (for example, create directory in container).

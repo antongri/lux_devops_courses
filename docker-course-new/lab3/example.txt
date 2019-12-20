@@ -1,0 +1,4 @@
+This command can help get access on container:
+	$ docker run -it ubuntu /bin/bash
+	root@d90f1fc8f018:/# hostname
+	d90f1fc8f018

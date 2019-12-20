@@ -1,0 +1,1 @@
+Create simple Dockerfile and create an image

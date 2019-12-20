@@ -1,0 +1,1 @@
+Running image in container.

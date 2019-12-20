@@ -1,0 +1,101 @@
+Create a directory on your machine:
+	$ mkdir docker-lab8
+	$ cd docker-lab8
+
+Create a file my_script.py and add those data:
+	$ vim my_script.py
+
+	from pystrich.datamatrix import DataMatrixEncoder
+
+	encoder = DataMatrixEncoder('This is a DataMatrix.')
+	encoder.save('./datamatrix_test.png')
+	print(encoder.get_ascii())
+
+Create a Dockerfile:
+	$ vim Dockerfile
+	FROM python:3
+	RUN pip install pystrich
+	ADD my_script.py /
+	CMD [ "python", "./my_script.py" ]
+
+Build an image:
+	$ docker build -t python-barcode .
+
+	Sending build context to Docker daemon  3.584kB
+	Step 1/4 : FROM python:3
+	3: Pulling from library/python
+	16ea0e8c8879: Pull complete 
+	50024b0106d5: Pull complete 
+	ff95660c6937: Pull complete 
+	9c7d0e5c0bc2: Pull complete 
+	29c4fb388fdf: Pull complete 
+	8659dae93050: Pull complete 
+	d4b57a0e98ff: Pull complete 
+	9d187245c5fc: Pull complete 
+	cd75e768c3f7: Pull complete 
+	Digest: sha256:adb48bf76e44cd7d74607db157bba756368af42196aaea945e2114d957cb5558
+	Status: Downloaded newer image for python:3
+	 ---> 0a3a95c81a2b
+	Step 2/4 : RUN pip install pystrict
+	 ---> Running in b76c57f01eaa
+	Collecting pystrict
+	  Downloading https://files.pythonhosted.org/packages/95/51/1f15c684eb465df74d671f5cd2e59b323b266438319b7899114b430341d1/pystrict-1.1-py3-none-any.whl
+	Installing collected packages: pystrict
+	Successfully installed pystrict-1.1
+	Removing intermediate container b76c57f01eaa
+	 ---> 90bfea59e52e
+	Step 3/4 : ADD my_script.py /
+	 ---> 6161fa8f8303
+	Step 4/4 : CMD ["python", "./my_script.py"]
+	 ---> Running in 276582bf2ed0                                                                                                                                                    
+	Removing intermediate container 276582bf2ed0                                                                                                                                     
+	 ---> 6499f42f427d                                                                                                                                                               
+	Successfully built 6499f42f427d                                                                                                                                                  
+	Successfully tagged python-barcode:latest          
+
+Run image:
+	$ docker run python-barcode
+
+	and you got it:
+	    XX  XX  XX  XX  XX  XX  XX  XX  XX  XX      
+    	XX  XX  XX  XXXX    XX  XX      XX  XXXX    
+    	XXXX  XX    XX    XXXX    XXXXXX    XX      
+    	XX    XXXX      XXXX  XXXX        XX  XX    
+   	XX    XX    XXXX      XX  XX                
+   	XXXXXX  XX  XX  XX  XXXX  XXXXXX    XXXX    
+  	XXXX  XX          XXXX  XXXX    XX  XX      
+ 	XXXX      XX  XXXXXX  XXXX        XXXXXX    
+    	XX    XX      XX  XXXXXX    XX  XX  XX      
+    	XX  XX    XXXX  XX  XXXX    XXXXXX    XX    
+    	XXXX      XX  XX    XXXX  XXXXXX  XX        
+    	XX  XX  XXXXXX  XX    XX  XXXX  XX    XX    
+    	XX          XX      XXXX  XX  XXXXXXXX      
+    	XXXXXX  XXXXXX  XXXX  XXXXXXXXXXXX    XX    
+    	XX  XXXXXX  XX    XX      XXXXXXXX          
+    	XX    XX    XX  XX  XX    XXXXXXXXXX  XX    
+    	XX  XXXXXXXX  XX    XXXXXX  XX  XX  XX      
+    	XX  XX        XXXX  XX  XXXX  XX      XX    
+    	XXXX  XX  XXXX    XX      XX  XXXX          
+    	XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 
+
+Delete container and image:
+	Search CONTAINER ID for python-barcode:
+	$ docker ps -a
+	CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS                      PORTS                  NAMES
+	a035c85775e1        python-barcode         "python ./my_script.…"   6 minutes ago       Exited (0) 6 minutes ago                           dreamy_tharp
+
+	Delete container:
+	$ docker rm a035c85775e1
+
+	Search image "python-barcode":
+	$ docker image ls
+
+	Delete image "python-barcode":
+	$ docker rmi python-barcode
+
+	Untagged: python-barcode:latest
+	Deleted: sha256:3701ceacef6683c8cf49742c1bac8cce5a84c2b6206db03a1d1505195df46190
+	Deleted: sha256:185d8a392cfb4a69d5cd2d9f9ff37480c698d1395756608bd919f0ca3f7f6ee7
+	Deleted: sha256:26cd133f7015bdf9899d4584c7a4d49e05502e3fcf9821e79fcc25374497a347
+	Deleted: sha256:f860f400beffa4421f21899bb5bf73feee6e5d6ba2ecd707cc120c1bfdc7a754
+	Deleted: sha256:0787134e406b1ce1e6e6a679171bc18fba2ec3b73af7282f4b5b84de92475228

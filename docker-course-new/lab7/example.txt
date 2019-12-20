@@ -1,0 +1,17 @@
+Create a bridge network:
+	$ docker network create my-net
+
+Connect a container on the network:
+	$ docker create --name my-nginx \
+		-- network my-net \
+		-- publish 8080:80 \
+		nginx:latest
+
+The following command connects an already-running  my-nginx container to an already-existing my-net  network:
+	$ docker network connect my-net my-nginx
+
+Disconnect a container from a user-defined bridge
+	$ docker network disconnect my-net my-nginx
+
+Delete network from Docker:
+	$ docker network rm my-net

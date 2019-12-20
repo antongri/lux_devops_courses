@@ -1,0 +1,8 @@
+Create a volume:
+	$ docker volume create my-vl
+
+Check existing volumes:
+	$ docker volume ls
+
+Remove a volume:
+	$ docker  volume rm my-vl

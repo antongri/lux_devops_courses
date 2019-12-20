@@ -1,0 +1,3 @@
+Simple "hello world" command:
+	$ docker run ubuntu echo "hello world"
+	hello world
