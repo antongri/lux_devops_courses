@@ -1,0 +1,49 @@
+1. Create an empty project directory.
+You can name the directory something easy for you to remember. This directory is the context for your application image. The directory should only contain resources to build that image.
+This project directory contains a docker-compose.yml file which is complete in itself for a good starter wordpress project.
+
+2. Change into your project directory.
+For example, if you named your directory my_wordpress:
+	cd my_wordpress/
+
+3. Create a docker-compose.yml file that starts your WordPress blog and a separate MySQL instance with a volume mount for data persistence. 
+
+version: '3.3'
+
+services:
+   db:
+     image: mysql:5.7
+     volumes:
+       - db_data:/var/lib/mysql
+     restart: always
+     environment:
+       MYSQL_ROOT_PASSWORD: somewordpress
+       MYSQL_DATABASE: wordpress
+       MYSQL_USER: wordpress
+       MYSQL_PASSWORD: wordpress
+
+   wordpress:
+     depends_on:
+       - db
+     image: wordpress:latest
+     ports:
+       - "8000:80"
+     restart: always
+     environment:
+       WORDPRESS_DB_HOST: db:3306
+       WORDPRESS_DB_USER: wordpress
+       WORDPRESS_DB_PASSWORD: wordpress
+       WORDPRESS_DB_NAME: wordpress
+volumes:
+    db_data: {}
+
+4. Build the project
+Now, run docker-compose up -d from your project directory.
+This runs docker-compose up in detached mode, pulls the needed Docker images, and starts the wordpress and database containers, as shown in the example below.
+	$ docker-compose up -d
+
+Bring up WordPress in a web browser
+At this point, WordPress should be running on port 8000 of your Docker Host, and you can complete the “famous five-minute installation” as a WordPress administrator.
+
+If you are using Docker Machine, you can run the command docker-machine ip MACHINE_VM to get the machine address, and then open http://MACHINE_VM_IP:8000 in a web browser.
+
