@@ -43,8 +43,8 @@ kubectl create secret docker-registry agris-227619 --docker-server=gcr.io \
     --docker-email=agris@softserveinc.com
 kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "agris-227619"}]}'
 kubectl label namespace default istio-injection=enabled
-rm -rf ./demo-app/demo.local
-cd demo-app &&
+rm -rf ../gcloud/demo-app/demo.local
+cd ../gcloud/demo-app &&
 yes | ./generate.sh demo.local demo_pwd_1
 mkdir demo.local && mv 1_root 2_intermediate 3_application 4_client demo.local/
 kubectl create -n istio-system secret tls istio-ingressgateway-certs \
