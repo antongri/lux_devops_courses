@@ -1,5 +1,5 @@
 #!/bin/bash
-gcloud container clusters get-credentials demo --zone us-central1-a --project agris-227619
+gcloud container clusters get-credentials demo --zone europe-west3 --project training-276723
 curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.4.2 sh -
 cd istio-1.4.2
 export PATH=$PWD/bin:$PATH
@@ -37,11 +37,11 @@ sleep 30
 helm install install/kubernetes/helm/istio --name istio --namespace istio-system
 sleep 30
 cd ../../../
-kubectl create secret docker-registry agris-227619 --docker-server=gcr.io \
+kubectl create secret docker-registry training-276723 --docker-server=gcr.io \
     --docker-username=_json_key \
-    --docker-password="$(cat agris-227619-1a8764987715.json)" \
-    --docker-email=agris@softserveinc.com
-kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "agris-227619"}]}'
+    --docker-password="$(cat terraform.json)" \
+    --docker-email=anton.v.grishko@gmail.com
+kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "training-276723"}]}'
 kubectl label namespace default istio-injection=enabled
 rm -rf ../gcloud/demo-app/demo.local
 cd ../gcloud/demo-app &&

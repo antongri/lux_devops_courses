@@ -1,9 +1,9 @@
 variable "project_name" {
-  default = "agris"
+  default = "training"
 }
 
 variable "region" {
-  default = "us-central1"
+  default = "europe-west3"
 }
 
 variable "k8s_name" {
@@ -12,17 +12,17 @@ variable "k8s_name" {
 
 variable "zones" {
   type    = list(string)
-  default = ["us-central1-a"]
+  default = ["europe-west3-c"]
 }
 
 variable "zone" {
   type    = string
-  default = "us-central1-a"
+  default = "europe-west3-c"
 }
 
 variable "project_id" {
   description = "The project ID to host the cluster in"
-  default     = "agris-227619"
+  default     = "training-276723"
 }
 
 variable "cluster_name_suffix" {
