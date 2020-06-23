@@ -30,7 +30,7 @@ module "gke" {
       name               = "default-node-pool"
       machine_type       = "n1-standard-2"
       min_count          = 1
-      max_count          = 6
+      max_count          = 3
       disk_size_gb       = 100
       disk_type          = "pd-standard"
       image_type         = "COS"
@@ -38,7 +38,7 @@ module "gke" {
       auto_upgrade       = true
       service_account    = var.compute_engine_service_account
       preemptible        = true
-      initial_node_count = 5
+      initial_node_count = 1
     },
   ]
 

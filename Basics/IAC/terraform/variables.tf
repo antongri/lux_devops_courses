@@ -7,7 +7,7 @@ variable "region" {
 }
 
 variable "k8s_name" {
-  default = "demo"
+  default = "agrishko"
 }
 
 variable "zones" {

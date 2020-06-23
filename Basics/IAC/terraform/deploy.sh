@@ -1,27 +1,27 @@
 #!/bin/bash
-gcloud container clusters get-credentials demo --zone europe-west3 --project training-276723
+gcloud container clusters get-credentials demo --zone europe-west3-c --project training-276723
 curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.4.2 sh -
 cd istio-1.4.2
 export PATH=$PWD/bin:$PATH
 kubectl apply -f install/kubernetes/helm/helm-service-account.yaml
-helm init --service-account tiller --upgrade
+# helm init --service-account tiller --upgrade
 
-### functions to catch tiller status before proceeding next ###
-progress(){
-  echo -n "$0: Please wait..."
-  while true
-  do
-    echo -n "."
-    sleep 2
-  done
-}
+# ### functions to catch tiller status before proceeding next ###
+# progress(){
+#   echo -n "$0: Please wait..."
+#   while true
+#   do
+#     echo -n "."
+#     sleep 2
+#   done
+# }
 
-tiller_status_callback () {
-  if 
-    kubectl get po --all-namespaces | grep tiller-deploy | awk '{print $4}' | grep Running; then
-    echo "success" > /dev/null 2>&1
-  fi
-}
+# tiller_status_callback () {
+#   if 
+#     kubectl get po --all-namespaces | grep tiller-deploy | awk '{print $4}' | grep Running; then
+#     echo "success" > /dev/null 2>&1
+#   fi
+# }
 
 # progress &
 # MYSELF=$!
@@ -34,7 +34,7 @@ sleep 30
 helm install install/kubernetes/helm/istio-init --name istio-init --namespace istio-system
 sleep 30
 # kubectl get crds | grep 'istio.io' | wc -l
-helm install install/kubernetes/helm/istio --name istio --namespace istio-system
+helm install install/kubernetes/helm/istio istio --namespace istio-system
 sleep 30
 cd ../../../
 kubectl create secret docker-registry training-276723 --docker-server=gcr.io \
